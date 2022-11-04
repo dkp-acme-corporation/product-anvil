@@ -1,0 +1,43 @@
+#
+#
+# BOF
+---
+
+name: Deployment workflow 
+run-name: Creation deployment workflow run by ${{ github.actor }}
+on:
+  push:
+   branches:
+      - 'main'
+  workflow_dispatch:
+
+# Relative paths will be under the $GITHUB_WORKSPACE directory
+
+
+defaults:
+  run: 
+    shell: bash
+
+jobs:
+  #
+  preparation:
+    runs-on: ubuntu-latest
+    # 
+    steps:
+      ## ---------------------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v3
+  #
+  deployment:
+    runs-on: ubuntu-latest
+    if: ${{ success() }}
+    needs: [ preparation ]
+    environment: Prd
+    #
+    steps:
+      ## ---------------------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+...
+# EOF

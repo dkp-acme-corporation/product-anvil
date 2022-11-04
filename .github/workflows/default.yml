@@ -1,0 +1,100 @@
+#
+#
+# BOF
+---
+
+name: Standard workflow 
+run-name: Standard workflow run by ${{ github.actor }}
+on:
+  push:
+   branches-ignore:
+     - 'main'
+  workflow_dispatch:
+
+defaults:
+  run: 
+    shell: bash
+
+jobs:
+  #
+  preparation:
+    runs-on: ubuntu-latest
+    # 
+    steps:
+      ## ---------------------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v3
+  #
+  validation:
+    runs-on: ubuntu-latest
+    needs: [ preparation ]
+    #
+    steps:
+      ## ---------------------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v3
+  #
+  scanning-trivy:
+    runs-on: ubuntu-latest
+    needs: [ validation ]
+    env: 
+      OUTPUTFILE: trivy-results.sarif
+    #
+    steps:
+      ## ---------------------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v3
+      ## ---------------------------------------------------
+      - name: Trivy Repo vulnerability scan
+        # src: https://github.com/aquasecurity/trivy-action
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          hide-progress: false
+          format: 'sarif'
+          output: ${{ env.OUTPUTFILE }}
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'MEDIUM,HIGH,CRITICAL'
+      ## ---------------------------------------------------
+      - name: Trivy Repo vulnerability scan results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: ${{ env.OUTPUTFILE }}
+  #
+  testing:
+    runs-on: ubuntu-latest
+    needs: [ scanning-trivy, scanning-snyk ]
+    #
+    steps:
+      ## ---------------------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v3
+  #
+  pull-request:
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    needs: [ testing ]
+    steps:
+      ## ---------------------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v3
+      ## ---------------------------------------------------
+      - name: Create Pull Request
+        id: create-pull-request
+        if: github.ref_name == 'development'
+        uses: repo-sync/pull-request@v2
+        with:
+          destination_branch: main
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      ## ---------------------------------------------------
+      - name: Check outputs
+        if: ${{ steps.create-pull-request.outputs.pr_number }}
+        run: |
+          echo "Pull Request Number - ${{ steps.create-pull-request.outputs.pr_number }}"
+          echo "Pull Request URL - ${{ steps.create-pull-request.outputs.pr_url }}"
+
+...
+# EOF

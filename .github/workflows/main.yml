@@ -7,12 +7,16 @@ name: Deployment workflow
 run-name: Creation deployment workflow run by ${{ github.actor }}
 on:
   push:
-   branches:
-      - 'main'
+    branches: [ main, protected ]
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - '**/*.md'
   workflow_dispatch:
 
 # Relative paths will be under the $GITHUB_WORKSPACE directory
-
+env:
+  MAVIN_CODE_PATH: ./mavin
 
 defaults:
   run: 

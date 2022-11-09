@@ -6,11 +6,11 @@ repo:
 git:
 - any: ['**/.gitignore','.github/**/*']
 #
-ansible:
-- any: ['ansible/**/*.yml']
+project:
+- any: ['mavin/pom.xml']
 #
-terraform:
-- any: ['terraform/**/*.tf', 'terraform/**/*.tfvars']
+code:
+- any: ['mavin/**/*.java']
 #
 documentation:
 - any: ['**/*.md']

@@ -16,7 +16,7 @@ on:
 
 # Relative paths will be under the $GITHUB_WORKSPACE directory
 env:
-  MAVIN_CODE_PATH: ./mavin
+  MAVIN_CODE_PATH: ./maven
 
 defaults:
   run: 
@@ -25,6 +25,14 @@ defaults:
 jobs:
   #
   preparation:
+    runs-on: ubuntu-latest
+    # 
+    steps:
+      ## ---------------------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v3
+  #
+  release:
     runs-on: ubuntu-latest
     # 
     steps:

@@ -128,7 +128,6 @@ jobs:
         run: |
           cd ${{ env.MAVIN_CODE_PATH }}
           mvn --batch-mode deploy -DaltDeploymentRepository=${{ env.MAVIN_REGISTRY_URL }}/${{ github.repository }} 
-  #
   pull-request:
     permissions:
       contents: write

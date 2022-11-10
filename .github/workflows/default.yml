@@ -14,6 +14,7 @@ on:
 
 env:
   MAVIN_CODE_PATH: ./maven
+  MAVIN_REGISTRY_URL: https://maven.pkg.github.com
 
 defaults:
   run: 
@@ -126,8 +127,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ${{ env.MAVIN_CODE_PATH }}
-          mvn --batch-mode deploy
-        
+          mvn --batch-mode deploy -DaltDeploymentRepository=${{ env.MAVIN_REGISTRY_URL }}/${{ github.repository }} 
   #
   pull-request:
     permissions:

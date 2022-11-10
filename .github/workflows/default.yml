@@ -124,7 +124,9 @@ jobs:
       - name: Publish Package
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn --batch-mode deploy
+        run: |
+          cd ${{ env.MAVIN_CODE_PATH }}
+          mvn --batch-mode deploy
         
   #
   pull-request:

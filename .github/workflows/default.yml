@@ -130,6 +130,7 @@ jobs:
         run: |
           cd ${{ env.MAVEN_CODE_PATH }}
           mvn --batch-mode deploy -DaltDeploymentRepository=${{ env.MAVEN_SERVER_ID }}::default::${{ env.MAVEN_REGISTRY_URL }}/${{ github.repository }} 
+  #
   pull-request:
     permissions:
       contents: write

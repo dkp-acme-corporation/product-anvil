@@ -13,8 +13,9 @@ on:
   workflow_dispatch:
 
 env:
-  MAVIN_CODE_PATH: ./maven
-  MAVIN_REGISTRY_URL: https://maven.pkg.github.com
+  MAVEN_CODE_PATH: ./maven
+  MAVEN_SERVER_ID: github
+  MAVEN_REGISTRY_URL: https://maven.pkg.github.com
 
 defaults:
   run: 
@@ -121,13 +122,14 @@ jobs:
           java-version: '19'
           distribution: 'temurin'
           cache: maven
+          server-id: ${{ env.MAVEN_SERVER_ID }}
       ## ---------------------------------------------------
       - name: Publish Package
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ${{ env.MAVIN_CODE_PATH }}
-          mvn --batch-mode deploy -DaltDeploymentRepository=${{ env.MAVIN_REGISTRY_URL }}/${{ github.repository }} 
+          mvn --batch-mode deploy -DaltDeploymentRepository=${{ env.MAVEN_SERVER_ID }}::default::${{ env.MAVEN_REGISTRY_URL }}/${{ github.repository }} 
   pull-request:
     permissions:
       contents: write

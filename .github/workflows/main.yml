@@ -54,7 +54,6 @@ jobs:
     ## ---------------------------------------------------
       - name: Version
         id: releaseVersion
-        if: github.ref_name == 'development'
         uses: anothrNick/github-tag-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -64,7 +63,6 @@ jobs:
       ## ---------------------------------------------------
       - name: Publish Package
         id: publish
-        if: ${{ steps.releaseVersion.outputs.tag }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

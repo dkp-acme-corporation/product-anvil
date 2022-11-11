@@ -85,7 +85,7 @@
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>${project.groupId}.${project.artifactId}</mainClass>
+              <mainClass>${project.groupId}.Anvil</mainClass>
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
               <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
             </manifest>

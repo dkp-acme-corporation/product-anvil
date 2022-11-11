@@ -172,9 +172,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ${{ env.MAVEN_CODE_PATH }}
-          mvn --batch-mode deploy -Dversion=${{ steps.releaseVersion.outputs.tag }} -DaltDeploymentRepository=${{ env.MAVEN_SERVER_ID }}::default::${{ env.MAVEN_REGISTRY_URL }}/${{ github.repository }} 
+          mvn versions:set -DnewVersion=${{ steps.releaseVersion.outputs.tag }}
+          mvn --batch-mode deploy -DaltDeploymentRepository=${{ env.MAVEN_SERVER_ID }}::default::${{ env.MAVEN_REGISTRY_URL }}/${{ github.repository }} 
   #
   pull-request:
+    if: github.ref_name == 'development'
     permissions:
       contents: write
       pull-requests: write
@@ -187,7 +189,6 @@ jobs:
       ## ---------------------------------------------------
       - name: Create Pull Request
         id: create-pull-request
-        if: github.ref_name == 'development'
         uses: repo-sync/pull-request@v2
         with:
           destination_branch: main

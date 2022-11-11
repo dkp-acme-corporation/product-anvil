@@ -13,7 +13,9 @@ on:
   workflow_dispatch:
 
 env:
-  MAVIN_CODE_PATH: ./mavin
+  MAVEN_CODE_PATH: ./maven
+  MAVEN_SERVER_ID: github
+  MAVEN_REGISTRY_URL: https://maven.pkg.github.com
 
 defaults:
   run: 
@@ -74,23 +76,34 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       ## ---------------------------------------------------
-      - name: Set up JDK 11
+      - name: Java Development Kit setup
         uses: actions/setup-java@v3
         with:
           java-version: '11'
           distribution: 'temurin'
           cache: maven
       ## ---------------------------------------------------
+      - name: Build version
+        id: buildVersion
+        uses: anothrNick/github-tag-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: minor
+          DRY_RUN: true
+          PRERELEASE_SUFFIX: build
+          WITH_V: false
+          PRERELEASE: true
+      ## ---------------------------------------------------
       - name: Build with Maven
         run: |
-          cd ${{ env.MAVIN_CODE_PATH }}
-          mvn -B package --file pom.xml
+          cd ${{ env.MAVEN_CODE_PATH }}
+          mvn --batch-mode package --file pom.xml -Dversion=${{ steps.buildVersion.outputs.tag }}
      ## ---------------------------------------------------
      # improve the quality of Dependabot alerts this repository can receive
       - name: Update dependency graph
         uses: advanced-security/maven-dependency-submission-action@2ecce44ccb44fd4b52f43468d3644e2d3e2b3cf2
         with:
-          directory: ${{ env.MAVIN_CODE_PATH }}
+          directory: ${{ env.MAVEN_CODE_PATH }}
   #
   testing:
     runs-on: ubuntu-latest
@@ -100,8 +113,67 @@ jobs:
       ## ---------------------------------------------------
       - name: Checkout code
         uses: actions/checkout@v3
+        
+  publish:
+    if: github.ref_name == 'development'
+    permissions:
+      contents: read
+      packages: write
+    runs-on: ubuntu-latest
+    needs: [ testing ]
+    #
+    steps: 
+      ## ---------------------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v3
+      ## ---------------------------------------------------
+      - name: Java Development Kit setup
+        uses: actions/setup-java@v3
+        with:
+          java-version: '19'
+          distribution: 'temurin'
+          cache: maven
+          server-id: ${{ env.MAVEN_SERVER_ID }}
+     ## ---------------------------------------------------
+      - name: Version
+        id: releaseVersion
+        if: github.ref_name == 'development'
+        uses: anothrNick/github-tag-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: minor
+          WITH_V: false
+          PRERELEASE: true
+      ## ---------------------------------------------------
+      - name: Publish Package
+        id: publish
+        if: ${{ steps.releaseVersion.outputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ${{ env.MAVEN_CODE_PATH }}
+          mvn versions:set -DnewVersion=${{ steps.releaseVersion.outputs.tag }}
+          mvn --batch-mode deploy -DaltDeploymentRepository=${{ env.MAVEN_SERVER_ID }}::default::${{ env.MAVEN_REGISTRY_URL }}/${{ github.repository }} 
+  pull-to-dev:
+    if: github.ref_name != 'development'
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    needs: [ testing ]
+    steps:
+      ## ---------------------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v3
+      ## ---------------------------------------------------
+      - name: Create Pull Request
+        uses: repo-sync/pull-request@v2
+        with:
+          destination_branch: development
+          github_token: ${{ secrets.GITHUB_TOKEN }}
   #
   pull-request:
+    if: github.ref_name == 'development'
     permissions:
       contents: write
       pull-requests: write
@@ -114,7 +186,6 @@ jobs:
       ## ---------------------------------------------------
       - name: Create Pull Request
         id: create-pull-request
-        if: github.ref_name == 'development'
         uses: repo-sync/pull-request@v2
         with:
           destination_branch: main

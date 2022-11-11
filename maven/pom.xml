@@ -3,16 +3,26 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>dev.davekpatrick</groupId>
-    <artifactId>acme-corporation-anvil</artifactId>
+    <groupId>dev.davekpatrick.acmecorporation</groupId>
+    <artifactId>anvil</artifactId>
     <packaging>jar</packaging>
-    <version>0.1.0</version>
-
+    <version>$(version)</version>
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+      <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <maven.compiler.source>1.9</maven.compiler.source>
+      <maven.compiler.target>1.9</maven.compiler.target>
     </properties>
+
+    <distributionManagement>
+        <repository>
+          <id>github</id>
+          <name>GitHub Packages</name>
+          <!--+
+              | <url>https://maven.pkg.github.com/OWNER/REPO</url>
+              +-->
+        </repository>
+    </distributionManagement>
 
     <dependencies>
       <dependency>
@@ -67,6 +77,26 @@
         </plugin>
       </plugins>
     </pluginManagement>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>${project.groupId}.${project.artifactId}</mainClass>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+            </manifest>
+            <manifestEntries>
+              <Build-Number>${project.version}</Build-Number>
+              <Build-DateTime>${maven.build.timestamp}</Build-DateTime>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
 </project>
 

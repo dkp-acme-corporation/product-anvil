@@ -16,7 +16,11 @@ on:
 
 # Relative paths will be under the $GITHUB_WORKSPACE directory
 env:
+<<<<<<< HEAD
+  MAVIN_CODE_PATH: ./maven
+=======
   MAVIN_CODE_PATH: ./mavin
+>>>>>>> main
 
 defaults:
   run: 
@@ -31,6 +35,51 @@ jobs:
       ## ---------------------------------------------------
       - name: Checkout code
         uses: actions/checkout@v3
+  #
+  release:
+    permissions:
+      contents: read
+      packages: write
+    runs-on: ubuntu-latest
+    needs: [ testing ]
+    #
+    steps: 
+      ## ---------------------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v3
+      ## ---------------------------------------------------
+      - name: Java Development Kit setup
+        uses: actions/setup-java@v3
+        with:
+          java-version: '19'
+          distribution: 'temurin'
+          cache: maven
+          server-id: ${{ env.MAVEN_SERVER_ID }}
+    ## ---------------------------------------------------
+      - name: Version
+        id: releaseVersion
+        if: github.ref_name == 'development'
+        uses: anothrNick/github-tag-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: minor
+          WITH_V: false
+          PRERELEASE: true
+      ## ---------------------------------------------------
+      - name: Publish Package
+        id: publish
+        if: ${{ steps.releaseVersion.outputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ${{ env.MAVEN_CODE_PATH }}
+          mvn versions:set -DnewVersion=${{ steps.releaseVersion.outputs.tag }}
+          mvn --batch-mode deploy -DaltDeploymentRepository=${{ env.MAVEN_SERVER_ID }}::default::${{ env.MAVEN_REGISTRY_URL }}/${{ github.repository }} 
+      - name: Create Relase
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "${{ env.MAVEN_CODE_PATH }}/target/*.jar"
+          generateReleaseNotes: true
   #
   deployment:
     runs-on: ubuntu-latest

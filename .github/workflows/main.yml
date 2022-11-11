@@ -16,7 +16,7 @@ on:
 
 # Relative paths will be under the $GITHUB_WORKSPACE directory
 env:
-  MAVIN_CODE_PATH: ./maven
+  MAVEN_CODE_PATH: ./maven
   MAVEN_SERVER_ID: github
   MAVEN_REGISTRY_URL: https://maven.pkg.github.com
   

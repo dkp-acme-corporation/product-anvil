@@ -83,10 +83,21 @@ jobs:
           distribution: 'temurin'
           cache: maven
       ## ---------------------------------------------------
+      - name: Build version
+        id: buildVersion
+        uses: anothrNick/github-tag-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: minor
+          DRY_RUN: true
+          PRERELEASE_SUFFIX: build
+          WITH_V: false
+          PRERELEASE: true
+      ## ---------------------------------------------------
       - name: Build with Maven
         run: |
           cd ${{ env.MAVEN_CODE_PATH }}
-          mvn --batch-mode package --file pom.xml
+          mvn --batch-mode package --file pom.xml -Dversion=${{ steps.buildVersion.outputs.tag }}
      ## ---------------------------------------------------
      # improve the quality of Dependabot alerts this repository can receive
       - name: Update dependency graph
@@ -161,7 +172,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ${{ env.MAVEN_CODE_PATH }}
-          mvn --batch-mode deploy -Dversion ${{ steps.releaseVersion.outputs.tag }} -DaltDeploymentRepository=${{ env.MAVEN_SERVER_ID }}::default::${{ env.MAVEN_REGISTRY_URL }}/${{ github.repository }} 
+          mvn --batch-mode deploy -Dversion=${{ steps.releaseVersion.outputs.tag }} -DaltDeploymentRepository=${{ env.MAVEN_SERVER_ID }}::default::${{ env.MAVEN_REGISTRY_URL }}/${{ github.repository }} 
   #
   pull-request:
     permissions:

@@ -76,6 +76,7 @@ jobs:
         with:
           artifacts: "${{ env.MAVEN_CODE_PATH }}/target/*.jar"
           generateReleaseNotes: true
+          tag: ${{ steps.releaseVersion.outputs.tag }}
   #
   deployment:
     runs-on: ubuntu-latest

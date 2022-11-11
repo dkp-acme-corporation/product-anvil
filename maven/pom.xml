@@ -6,7 +6,7 @@
     <groupId>dev.davekpatrick.acmecorporation</groupId>
     <artifactId>Anvil</artifactId>
     <packaging>jar</packaging>
-    <version>0.0.0-build-${maven.build.timestamp}</version>
+    <version>0.0.0-SNAPSHOT</version>
 
     <properties>
       <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>

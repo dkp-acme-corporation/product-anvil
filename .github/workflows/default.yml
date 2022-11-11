@@ -124,6 +124,26 @@ jobs:
           cache: maven
           server-id: ${{ env.MAVEN_SERVER_ID }}
       ## ---------------------------------------------------
+      - name: Dry run version
+        id: dryRunVersion
+        if: github.ref_name != 'development'
+        uses: anothrNick/github-tag-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: minor
+          DRY_RUN: true
+          WITH_V: false
+          PRERELEASE: true
+      ## ---------------------------------------------------
+      - name: Dry run publish package
+        id: publish
+        if: ${{ steps.dryRunVersion.outputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd ${{ env.MAVEN_CODE_PATH }}
+          mvn --batch-mode deploy -Dversion ${{ steps.dryRunVersion.outputs.tag }} -DaltDeploymentRepository=${{ env.MAVEN_SERVER_ID }}::default::${{ env.MAVEN_REGISTRY_URL }}/${{ github.repository }} 
+      ## ---------------------------------------------------
       - name: Version
         id: releaseVersion
         if: github.ref_name == 'development'
@@ -141,8 +161,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ${{ env.MAVEN_CODE_PATH }}
-          mvn versions:set -DnewVersion=${{ steps.releaseVersion.outputs.tag }}
-          mvn --batch-mode deploy -DaltDeploymentRepository=${{ env.MAVEN_SERVER_ID }}::default::${{ env.MAVEN_REGISTRY_URL }}/${{ github.repository }} 
+          mvn --batch-mode deploy -Dversion ${{ steps.releaseVersion.outputs.tag }} -DaltDeploymentRepository=${{ env.MAVEN_SERVER_ID }}::default::${{ env.MAVEN_REGISTRY_URL }}/${{ github.repository }} 
   #
   pull-request:
     permissions:

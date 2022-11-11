@@ -16,7 +16,11 @@ on:
 
 # Relative paths will be under the $GITHUB_WORKSPACE directory
 env:
+<<<<<<< HEAD
   MAVIN_CODE_PATH: ./maven
+=======
+  MAVIN_CODE_PATH: ./mavin
+>>>>>>> main
 
 defaults:
   run: 

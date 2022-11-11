@@ -136,7 +136,7 @@ jobs:
           PRERELEASE: true
       ## ---------------------------------------------------
       - name: Dry run publish package
-        id: publish
+        id: dryRunPublish
         if: ${{ steps.dryRunVersion.outputs.tag }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

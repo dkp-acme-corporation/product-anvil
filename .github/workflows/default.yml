@@ -124,11 +124,21 @@ jobs:
           cache: maven
           server-id: ${{ env.MAVEN_SERVER_ID }}
       ## ---------------------------------------------------
+      - name: Version
+        id: releaseVersion
+        uses: anothrNick/github-tag-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: minor
+          WITH_V: false
+          PRERELEASE: true
+      ## ---------------------------------------------------
       - name: Publish Package
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ${{ env.MAVEN_CODE_PATH }}
+          mvn versions:set -DnewVersion=${{ steps.releaseVersion.outputs.tag }}
           mvn --batch-mode deploy -DaltDeploymentRepository=${{ env.MAVEN_SERVER_ID }}::default::${{ env.MAVEN_REGISTRY_URL }}/${{ github.repository }} 
   #
   pull-request:

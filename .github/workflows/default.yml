@@ -154,6 +154,23 @@ jobs:
           cd ${{ env.MAVEN_CODE_PATH }}
           mvn versions:set -DnewVersion=${{ steps.releaseVersion.outputs.tag }}
           mvn --batch-mode deploy -DaltDeploymentRepository=${{ env.MAVEN_SERVER_ID }}::default::${{ env.MAVEN_REGISTRY_URL }}/${{ github.repository }} 
+  pull-request:
+    if: github.ref_name != 'development'
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    needs: [ testing ]
+    steps:
+      ## ---------------------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v3
+      ## ---------------------------------------------------
+      - name: Create Pull Request
+        uses: repo-sync/pull-request@v2
+        with:
+          destination_branch: development
+          github_token: ${{ secrets.GITHUB_TOKEN }}
   #
   pull-request:
     if: github.ref_name == 'development'

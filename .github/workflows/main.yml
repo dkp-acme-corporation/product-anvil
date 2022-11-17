@@ -19,6 +19,10 @@ env:
   MAVEN_CODE_PATH: ./maven
   MAVEN_SERVER_ID: github
   MAVEN_REGISTRY_URL: https://maven.pkg.github.com
+  #
+  ACE_DEV_HOST: dev.hostname.com
+  ACE_UAT_HOST: uat.hostname.com
+  ACE_PRD_HOST: prd.hostname.com
   
 defaults:
   run: 
@@ -78,16 +82,44 @@ jobs:
           generateReleaseNotes: true
           tag: ${{ steps.releaseVersion.outputs.tag }}
   #
-  deployment:
+  deployment-dev:
     runs-on: ubuntu-latest
     if: ${{ success() }}
-    needs: [ preparation ]
-    environment: Prd
+    needs: [ publish ]
+    environment: dev
     #
     steps:
       ## ---------------------------------------------------
       - name: Checkout code
         uses: actions/checkout@v3
+      ## ---------------------------------------------------
 
+
+  #
+  deployment-uat:
+    runs-on: ubuntu-latest
+    if: ${{ success() }}
+    needs: [ deployment-dev ]
+    environment: uat
+    #
+    steps:
+      ## ---------------------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v3
+      ## ---------------------------------------------------
+      
+  #
+  deployment-prd:
+    runs-on: ubuntu-latest
+    if: ${{ success() }}
+    needs: [ deployment-uat ]
+    environment: prd
+    #
+    steps:
+      ## ---------------------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v3
+      ## ---------------------------------------------------
+     
 ...
 # EOF
